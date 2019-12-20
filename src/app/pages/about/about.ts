@@ -1,24 +1,67 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 
-import { PopoverController } from '@ionic/angular';
+import { LocalNotifications } from "@ionic-native/local-notifications/ngx";
 
-import { PopoverPage } from '../about-popover/about-popover';
+import { FileChooser } from '@ionic-native/file-chooser/ngx';
+
+import { Storage } from '@ionic/storage';
+
+import { Observable } from 'rxjs';
+
+
 
 @Component({
   selector: 'page-about',
   templateUrl: 'about.html',
   styleUrls: ['./about.scss'],
 })
+
 export class AboutPage {
-  conferenceDate = '2047-05-17';
+  constructor(
+    private storage: Storage,
+    private fileChooser: FileChooser,
+    private localNotifications: LocalNotifications
+  ) { }
 
-  constructor(public popoverCtrl: PopoverController) { }
-
-  async presentPopover(event: Event) {
-    const popover = await this.popoverCtrl.create({
-      component: PopoverPage,
-      event
+  ngOnInit() {
+    this.localNotifications.schedule({
+      text: 'Opened about page.'
     });
-    await popover.present();
+  }
+
+  chooseFile() {
+    this.fileChooser.open()
+      .then(uri => console.log(uri))
+      .catch(e => console.log(e));
+  }
+
+  resetStorage() {
+    this.storage.set('key', Math.random())
+  }
+
+  getStorage() {
+    this.storage.get('key').then(res => {
+      console.log(res)
+    })
+  }
+
+  rxjs() {
+    const observable = new Observable(subscriber => {
+      subscriber.next(1);
+      subscriber.next(2);
+      subscriber.next(3);
+      setTimeout(() => {
+        subscriber.complete();
+        subscriber.next(4);
+      }, 1000);
+    });
+
+    console.log('just before subscribe');
+    observable.subscribe({
+      next(x) { console.log('got value ' + x); },
+      error(err) { console.error('something wrong occurred: ' + err); },
+      complete() { console.log('done'); }
+    });
+    console.log('just after subscribe');
   }
 }
